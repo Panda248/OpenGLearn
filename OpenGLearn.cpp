@@ -4,7 +4,7 @@
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 #include <iostream>
-
+#include "Shader.h"
 
 const int FPS = 60;
 
@@ -176,7 +176,7 @@ int main()
         std::cout << "ERROR::SHADER::OTHERFRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    //Create Shader Program
+    //Create Program
     unsigned int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
@@ -209,6 +209,10 @@ int main()
     glDeleteShader(oFragmentShader);
 
     // </CREATING SHADER PROGRAM>
+
+    // <CREATING SHADER PROGRAM FROM FILE>
+    Shader shaderObj("shaders/vertex.glsl", "shaders/fragment.glsl");
+    // </CREATING SHADER PROGRAM FROM FILE>
 
     // <CREATING A TRIANGLE>
 
@@ -306,10 +310,22 @@ int main()
     //glfwSwapBuffers(window);
     //glClear(GL_COLOR_BUFFER_BIT);
     
+    float time;
+    float r;
+    float g;
+    float b;
+    int colorID = glGetUniformLocation(shaderProgram, "color");
+
+
 
     while (!glfwWindowShouldClose(window))
     {
-        
+        time = glfwGetTime();
+        r = (sin(time) * 2.0f) + 0.5f;
+        g = (3.0f*sin(time) * 2.0f) + 0.5f;
+        b = (cos(time) * 2.0f) + 0.5f;
+        glUniform4f(shaderProgram, r, g, b, 1.0f);
+
         processInput(window);
 
         //glClear(GL_COLOR_BUFFER_BIT);
