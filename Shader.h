@@ -11,7 +11,7 @@ class Shader {
 public:
     unsigned int ID;
 
-    Shader(char* vertexPath, char* fragmentPath) {
+    Shader(const char* vertexPath, const char* fragmentPath) {
         std::string vertexCode, fragmentCode;
         std::ifstream vertexFile, fragmentFile;
 
