@@ -1,5 +1,4 @@
-// OpenGLearn.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//Holy shit i love low level programming so many dependencies and fucking binaries and and and so much fun YAYYYYYYYY
+// Code following the tutorial from https://learnopengl.com/, starting from creating a window to creating a shader program
 
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
