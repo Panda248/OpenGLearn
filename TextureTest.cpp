@@ -4,11 +4,20 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "Shader.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+float vertices[] = {
+	//positions        //colors			  //texture coords
+	0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f,1.0f,
+   -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f,0.0f,
+	0.5f,-0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  1.0f,0.0f,
+   -0.5f,-0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f,0.0f
+};
 
 int main()
 {
@@ -81,13 +90,45 @@ int main()
 
 	//width, height, number of color channels
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("7a9.jpg", &width, &height, &nrChannels);
+	unsigned char* data = stbi_load("7a9.jpg", &width, &height, &nrChannels, 0);
 		
 	/*
 	* Generate texture
 	*/
 	unsigned int texture;
 	glGenTextures(1, &texture);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(data);
+
+
+	/*
+	* Create Rectangle to render texture on
+	*/
+	unsigned int VAO;
+	glGenVertexArrays(1, &VAO);
+
+	glBindVertexArray(VAO);
+	
+	unsigned int VBO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 6*sizeof(float));
+	glEnableVertexAttribArray(2);
+
+
+
 
 
 	//Wireframe rendering
