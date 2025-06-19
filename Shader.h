@@ -84,7 +84,7 @@ public:
         glGetProgramiv(ID, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(ID, 512, NULL, infoLog);
-            std::cout << "ERROR::LINK_FAILURE/n" << infoLog << std::endl;
+            std::cout << "ERROR::LINK_FAILURE\n" << infoLog << std::endl;
         }
 
         //Cleanup
