@@ -14,6 +14,7 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 //coord then texture coord
 float vertices[] = {
@@ -59,6 +60,12 @@ float vertices[] = {
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
+
+float lastX = 400, lastY = 300;
+float lastFrame = 0, deltaTime = 0;
+Camera camera;
+GLboolean firstMouse = true;
+
 //unsigned int indices[] = {
 //    0, 1, 3, // first triangle
 //    1, 2, 3  // second triangle
@@ -92,7 +99,7 @@ int main()
 
     // Register functions to GLFW callbacks (resize window/viewport, process input changes, process error messages, etc.)
     // These must be after window is created and before the render loop
-
+    glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
 
@@ -179,7 +186,9 @@ int main()
     glm::mat4 view = glm::mat4(1.0f);
 
     //camera
-    Camera camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    firstMouse = true;
 
     //perspective projection matrix
     glm::mat4 projection = glm::perspective(glm::radians(camera.Fov), 800.0f / 600.0f, 0.1f, 100.0f);
@@ -187,14 +196,21 @@ int main()
     // Wireframe rendering :
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    //Lock mouse for camera movement
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    
 
     //Render Loop
     //Swap color buffer then polls for events like keyboard or mouse input
-
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
     {
+
+        float currentFrame = static_cast<float>(glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         //trans = glm::rotate(trans, 0.001f, glm::vec3(1.0f, 1.0f, 0.0f));
         processInput(window);
 
@@ -242,11 +258,40 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 // Input processing
 void processInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
+    // Camera Input processing
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        camera.cameraMoveInput(FORWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        camera.cameraMoveInput(LEFT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        camera.cameraMoveInput(BACKWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        camera.cameraMoveInput(RIGHT, deltaTime);
     }
 }
 
+
+void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    float xposf = static_cast<float>(xpos);
+    float yposf = static_cast<float>(ypos);
+
+    if (firstMouse) {
+        lastX = xposf;
+        lastY = yposf;
+        firstMouse = false;
+    }
+
+    float xOffset = xposf - lastX;
+    float yOffset = lastY - yposf;
+
+    camera.cameraMouseInput(xOffset, yOffset);
+
+    lastX = xposf;
+    lastY = yposf;
+}
 
 // Listening to key events. This is good for stuff like on release
 
