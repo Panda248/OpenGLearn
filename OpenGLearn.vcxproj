@@ -123,6 +123,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\ah112\Documents\GitHub\OpenGLearn\includes;C:\Users\ah112\Documents\Program Files\JokeAndLearn\C++ leaning\OpenGLearn\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalHeaderUnitDependencies>%(AdditionalHeaderUnitDependencies)</AdditionalHeaderUnitDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,19 +148,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CameraTest.cpp" />
-    <ClCompile Include="glad.c" />
-    <ClCompile Include="ImageLoader.cpp" />
-    <ClCompile Include="stb_image.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="ShaderStruct.h" />
-    <ClInclude Include="stb_image.h" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="7a9.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="includes\Camera.h" />
+    <ClInclude Include="includes\resource.h" />
+    <ClInclude Include="includes\Shader.h" />
+    <ClInclude Include="includes\ShaderStruct.h" />
+    <ClInclude Include="includes\stb_image.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ColorLighting.cpp" />
+    <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\ImageLoader.cpp" />
+    <ClCompile Include="src\stb_image.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

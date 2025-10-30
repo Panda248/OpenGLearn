@@ -37,7 +37,7 @@ int main()
 
     //Creating window object
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Learning OpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Textures and Colors", NULL, NULL);
 
     if (window == NULL) {
         std::cout << "Failed to create GLFW Window" << std::endl;
@@ -88,7 +88,7 @@ int main()
     //width, height, number of color channels
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("ap.png", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("resources/ap.png", &width, &height, &nrChannels, 0);
 
     if (data) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
