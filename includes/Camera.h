@@ -7,7 +7,9 @@ enum Camera_Direction {
     FORWARD,
     BACKWARD,
     LEFT,
-    RIGHT
+    RIGHT,
+    UP,
+    DOWN
 };
 
 // default values
@@ -53,6 +55,13 @@ public:
             Pos += Right * vel;
             //std::cout << "Right" << std::endl;
         }
+        if (dir == UP) {
+            Pos += WorldUp * vel;
+        }
+        if (dir == DOWN) {
+            Pos -= WorldUp * vel;
+
+        }
     }
 
     //Mouse movement
@@ -64,7 +73,8 @@ public:
         Yaw += xOffset;
         Pitch += yOffset;
 
-        std::cout << "Yaw " << Yaw << " Pitch " << Pitch << std::endl;
+        //std::cout << "Yaw " << Yaw << " Pitch " << Pitch << std::endl;
+        //std::cout << "X" << Pos.x << " Y " << Pos.y << "Z" << Pos.z << std::endl;
 
         if (lockPitch) {
             if (Pitch > 89.0f) {
