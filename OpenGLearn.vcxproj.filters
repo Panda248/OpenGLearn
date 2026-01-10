@@ -46,7 +46,7 @@
     <ClCompile Include="src\ImageLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ColorLighting.cpp">
+    <ClCompile Include="src\LightingMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
