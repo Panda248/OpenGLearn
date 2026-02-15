@@ -148,9 +148,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Image Include="7a9.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="includes\Camera.h" />
     <ClInclude Include="includes\resource.h" />
     <ClInclude Include="includes\Shader.h" />
@@ -158,9 +155,9 @@
     <ClInclude Include="includes\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\LightCasters.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\ImageLoader.cpp" />
+    <ClCompile Include="src\LineTrails.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
