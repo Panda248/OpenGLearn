@@ -10,6 +10,7 @@
 
 int view_width = 800;
 int view_height = 600;
+float aspect = (float)view_width / (float)view_height;
 
 float speed = 1;
 float opacity = 0.1f;
@@ -57,6 +58,7 @@ int main()
 
     Shader lineShader("shaders/lineTrailVert.glsl", "shaders/lineTrailFrag.glsl");
     int timeUniformLocation = glGetUniformLocation(lineShader.ID, "u_time");
+    int aspectUniformLocation = glGetUniformLocation(lineShader.ID, "u_aspect_ratio");
 
     Shader clearShader("shaders/vertex2d.glsl", "shaders/fade.frag");
     int opacityUniformLocation = glGetUniformLocation(clearShader.ID, "u_opacity");
@@ -199,6 +201,7 @@ int main()
 
         lineShader.use();
         glUniform1f(timeUniformLocation, time * speed);
+        glUniform1f(aspectUniformLocation, aspect);
         glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
         glBindVertexArray(lineVAO);
 
@@ -222,7 +225,8 @@ int main()
 */
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0, 0, view_width, view_height);
+    glViewport(0, 0, width, height);
+    aspect = (float)width / (float)height;
 }
 
 /*
