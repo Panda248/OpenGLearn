@@ -184,6 +184,7 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
+        glfwSwapBuffers(window);
 
         time = glfwGetTime();
         if (time * speed > glm::two_pi<float>()) {
@@ -211,7 +212,7 @@ int main()
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 140));
     }
 
     glfwTerminate();
