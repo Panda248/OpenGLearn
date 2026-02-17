@@ -13,7 +13,12 @@ int view_height = 600;
 float aspect = (float)view_width / (float)view_height;
 
 float speed = 1;
-float opacity = 0.1f;
+float uOpacity = 0.1f;
+float uFloor = 0.1f;
+
+unsigned int FBO;
+unsigned int texture;
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -62,6 +67,10 @@ int main()
 
     Shader clearShader("shaders/vertex2d.glsl", "shaders/fade.frag");
     int opacityUniformLocation = glGetUniformLocation(clearShader.ID, "u_opacity");
+
+    Shader quadShader("shaders/texVert.glsl", "shaders/texFragFloor.glsl");
+    int textureUniformLocation = glGetUniformLocation(quadShader.ID, "u_Texture");
+    int floorUniformLocation = glGetUniformLocation(quadShader.ID, "u_floor");
 
     // setup array for storing line vertices
     // array format: x, y, r, offset
@@ -116,25 +125,66 @@ int main()
     glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-
     // Clear quad
-    float quad[] = {
+    float clear[] = {
         -1,-1,
         -1, 1,
          1, -1,
          1, 1
     };
 
+    // Texture Quad
+    float quad[] = {
+        -1, -1, 0, 0,
+        -1,  1, 0, 1,
+         1, -1, 1, 0,
+         1,  1, 1, 1
+    };
+
+    unsigned int clearVBO;
+    glGenBuffers(1, &clearVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, clearVBO);
+    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), clear, GL_STATIC_DRAW);
+
+    unsigned int clearVAO;
+    glGenVertexArrays(1, &clearVAO);
+    glBindVertexArray(clearVAO);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    glEnableVertexAttribArray(0);
+
     unsigned int quadVBO;
     glGenBuffers(1, &quadVBO);
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), quad, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(float), quad, GL_STATIC_DRAW);
 
     unsigned int quadVAO;
     glGenVertexArrays(1, &quadVAO);
     glBindVertexArray(quadVAO);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+
+    // Create FrameBuffer
+    glGenFramebuffers(1, &FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+    // Setup FrameBuffer Texture
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, view_width, view_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+
+    //Configuring Texture wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //Configure Texture Filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     //Wireframe rendering
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -152,7 +202,7 @@ int main()
     glBlendColor(0.0, 0.0, 0.0, 0.0);
         
     //Sets clear color
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     //If you don't want to clear in the render loop for some reason, clear both buffers or else u get epilepsy
     /*glClear(GL_COLOR_BUFFER_BIT);
@@ -180,23 +230,26 @@ int main()
 
     //glDrawArrays(GL_LINES, 0, lineCount);
     // ##### DEBUG
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        printf("Framebuffer not complete");
+        std::cout << glGetError() << std::endl;
+        glfwSetWindowShouldClose(window, true);
+    }
 
 
     while (!glfwWindowShouldClose(window))
     {
-        glfwSwapBuffers(window);
-
+        glClear(GL_COLOR_BUFFER_BIT);
         time = glfwGetTime();
         if (time * speed > glm::two_pi<float>()) {
             time -= glm::two_pi<float>() / speed;
             glfwSetTime(time);
         }
-        printf("opacity %1.3f \n", opacity);
-
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
         clearShader.use();
-        glUniform1f(opacityUniformLocation, opacity);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBindVertexArray(quadVAO);
+        glUniform1f(opacityUniformLocation, uOpacity);
+        glBindBuffer(GL_ARRAY_BUFFER, clearVBO);
+        glBindVertexArray(clearVAO);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -210,10 +263,25 @@ int main()
 
         //std::cout << glGetError() << std::endl;
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        quadShader.use();
+        glUniform1f(floorUniformLocation, uFloor);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 140));
     }
+    lineShader.free();
+    clearShader.free();
+    glDeleteFramebuffers(1, &FBO);
+    glDeleteVertexArrays(1, &lineVAO);
+    glDeleteVertexArrays(1, &clearVAO);
+    glDeleteBuffers(1, &lineVBO);
+    glDeleteBuffers(1, &clearVBO);
 
     glfwTerminate();
     return 0;
@@ -226,8 +294,14 @@ int main()
 */
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+    view_width = width;
+    view_height = height;
     glViewport(0, 0, width, height);
     aspect = (float)width / (float)height;
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
 }
 
 /*
@@ -239,10 +313,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
     else if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-        opacity = fmin(opacity + 0.01, 1);
+        uOpacity = fmin(uOpacity + 0.01, 1);
     }
     else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-        opacity = fmax(opacity - 0.01, 0);
+        uOpacity = fmax(uOpacity - 0.01, 0);
     }
     else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
         speed += 1;
@@ -250,4 +324,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
         speed -= 1;
     }
+    else if (key == GLFW_KEY_EQUAL && action == GLFW_PRESS) {
+        uFloor += 0.01f;
+    }
+    else if (key == GLFW_KEY_MINUS && action == GLFW_PRESS) {
+        uFloor -= 0.01f;
+    }
+    printf("opacity %1.3f \n", uOpacity);
+    printf("speed %1.0f \n", speed);
+    printf("floor %1.3f \n", uFloor);
+
 }
