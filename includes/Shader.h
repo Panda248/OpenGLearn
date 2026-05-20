@@ -95,6 +95,10 @@ public:
 
     }
 
+    void free() {
+        glDeleteProgram(ID);
+    }
+
     void use() {
         glUseProgram(ID);
     }
