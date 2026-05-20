@@ -73,6 +73,8 @@ void main()
     float theta = dot(lightDir, normalize(-light.direction));
     float epsilon = light.cutOff - light.outerCutOff;
     float intensity =  clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+    //float intensity =  (theta - light.outerCutOff) / epsilon;
+
 
     vec3 final = ambient + intensity * (diffuse + specular + emission); 
     FragColor = vec4(final, 1.0);
